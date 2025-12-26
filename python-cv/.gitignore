@@ -1,0 +1,37 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.egg-info/
+.pytest_cache/
+
+# Build
+build/
+dist/
+
+# Virtual environments
+.env
+.venv
+venv/
+ENV/
+emoji_env/
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Thumbs.db
+
+# IDE/editor
+.vscode/
+.idea/
+*.code-workspace
+
+# Logs
+logs/
+*.log
+
+# Data folder
+data/
+.data/

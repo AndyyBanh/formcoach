@@ -1,0 +1,55 @@
+# Frontend
+/frontend/node_modules/
+# Build output
+/frontend/dist/
+/frontend/build/
+/frontend/.env
+/frontend/.cache
+
+# Logs
+/frontend/npm-debug.log*
+/frontend/yarn-debug.log*
+/frontend/yarn-error.log*
+
+# IDE / OS
+/frontend/.vscode/
+/frontend/.DS_Store
+
+# Maven / Gradle
+/formcoach-backend/target/
+/formcoach-backend/build/
+/formcoach-backend/.gradle/
+/formcoach-backend/.idea/
+/formcoach-backend/.classpath
+/formcoach-backend/.project
+/formcoach-backend/.settings
+/formcoach-backend/.vscode/
+/formcoach-backend/.DS_Store
+
+# Logs
+/formcoach-backend/logs/
+formcoach-backend/*.log
+
+# Environment
+/formcoach-backend/.env
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE files
+*.iml
+*.idea/
+*.vscode/
+
+# Python
+/python-cv/.env
+python-cv/.env
+
+
+# Force LF for scripts
+*.sh text eol=lf
+*.cmd text eol=crlf
+*.java text
+*.xml text
+*.yml text
