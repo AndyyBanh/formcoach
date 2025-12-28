@@ -1,5 +1,6 @@
 import { Button } from '@/components/ui/button'
 import { Card, CardAction, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
+import Link from 'next/link'
 import React from 'react'
 
 const page = () => {
@@ -15,9 +16,12 @@ const page = () => {
             Correct your bicep curl form, and keep track of reps.
           </CardDescription>
           <CardFooter className='flex justify-end'>
-            <Button className='w-full max-w-3xl'  >
-              <p className='text-lg'>Start Workout</p>
-            </Button>
+            <Link href='/workout/bicep-curl' className='w-full'>
+              <Button className='w-full max-w-3xl'  >
+                <p className='text-lg'>Start Workout</p>
+              </Button>
+            </Link>
+            
           </CardFooter>
         </Card>
           
