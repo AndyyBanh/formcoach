@@ -34,10 +34,11 @@ const page = () => {
 
         try {
             const response = await login(email, password);
-            const { token } = response.data;
+            const { token, userId } = response.data;
 
             if (token) {
                 localStorage.setItem('token', token);
+                localStorage.setItem('user', userId);
                 toast.success('Successfully logged in');
                 router.push('/dashboard');
                 

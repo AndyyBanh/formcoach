@@ -2,21 +2,26 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardDescription, CardTitle } from '@/components/ui/card';
 import { Camera } from 'lucide-react';
+import { useWebSocket } from '@/hooks/useWebSocket';
 import React, { useEffect, useRef, useState } from 'react'
 
 const page = () => {
-  const videoRef = useRef<HTMLVideoElement>(null); // displays video
-  const streamRef = useRef<MediaStream | null>(null); // manage connection
+  const videoRef = useRef<HTMLVideoElement>(null); // element that displays webcam
+  const canvasRef = useRef<HTMLCanvasElement>(null); // hidden canvas to capture and encode frames
+  const streamRef = useRef<MediaStream | null>(null); // active webcam Mediasteam (gives ability to stop cleanly)
   const [error, setError] = useState('');
   const [isActive, setIsActive] = useState(false);
+  const { isConnected, sendFrame, workoutData } = useWebSocket();
+  const intervalRef = useRef<number | null>(null); // ID for frame capture interval timer
+
 
   const startWebcam = async () => {
     try {
       setError('');
       const stream = await navigator.mediaDevices.getUserMedia({
         video: {
-          width: { ideal: 1280 },
-          height: { ideal: 720 }
+          width: { ideal: 640 },
+          height: { ideal: 480 }
         }
       });
 
@@ -24,6 +29,10 @@ const page = () => {
           videoRef.current.srcObject = stream;
           streamRef.current = stream;
           setIsActive(true);
+
+          videoRef.current?.addEventListener('canplay', () => {
+            console.log('Video ready to play');
+          }, {once: true})
       }
 
     } catch(error) {
@@ -33,8 +42,13 @@ const page = () => {
   };
 
   const stopWebcam = () => {
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
+
     if (streamRef.current) {
-      streamRef.current.getTracks().forEach(track => track.stop);
+      streamRef.current.getTracks().forEach(track => track.stop());
       if (videoRef.current) {
         videoRef.current.srcObject = null;
       }
@@ -42,6 +56,40 @@ const page = () => {
     streamRef.current = null;
     setIsActive(false);
   };
+
+  // send frames only if camera is active and websocket is connected
+  useEffect(() => {
+    if (!isActive || !isActive || !videoRef.current || !canvasRef.current) return;
+    const video = videoRef.current;
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    intervalRef.current = window.setInterval(() => {
+      if (video.readyState < 2 || video.videoWidth === 0 || video.videoHeight ===0) {
+        return;
+      }
+
+      // match canvas size to video
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      // draw current video frame to canvas
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+      // convert to Base64
+      const frameData = canvas.toDataURL('image/jpeg', 0.5);
+      if (frameData && frameData.includes(',')) {
+        sendFrame('bicep-curl', frameData);
+      }    
+
+    }, 100); // 10 FPS captures and sends frames every 100ms
+
+    return () => {
+      if (intervalRef.current !== null){
+        clearInterval(intervalRef.current);
+      }
+    }    
+  }, [isActive, isConnected, sendFrame]);
 
   useEffect(() => {
     return () => {
@@ -53,13 +101,12 @@ const page = () => {
     <div className='min-h-screen flex flex-col items-center p-6'>
       <div className='w-full max-w-4xl text-center'>
         <h1 className='text-4xl font-bold'>Bicep Curl</h1>
-        <p className='text-md'>Position yourself in front of camer to begin</p>
+        <p className='text-md'>Position yourself in front of Camera to begin</p>
       </div>
-      
 
       {/* webcam */}
       <div className='w-full bg-white border rounded-2xl shadow-2xl mt-7 p-6'>
-        <div className='relative aspect-video bg-slate-900 rounded-lg overflow-hidden '>
+        <div className='relative z-10 aspect-video bg-slate-900 rounded-lg overflow-hidden '>
           {!isActive && (
             <div className='absolute inset-0 flex items-center justify-center'>
               <div className='flex flex-col items-center justify-center'>
@@ -75,6 +122,8 @@ const page = () => {
             playsInline
             className={`w-full h-full object-cover ${!isActive ? `hidden` : ``}`}
           />
+
+          <canvas ref={canvasRef} className='hidden' />
         </div>
 
         {error && (
@@ -82,6 +131,8 @@ const page = () => {
             {error}
           </div>
         )} 
+
+
        <div className='mt-6 flex justify-center'>
         {!isActive ? (
           <Button onClick={startWebcam}>
@@ -93,7 +144,18 @@ const page = () => {
           </Button>
         )}
        </div>
+
+        <div className='mt-2 flex items-center'>
+          <div className={`w-3 h-3 ${isConnected ? 'text-green-500' : 'text-red-500'}`}>
+            <span className='text-sm'>
+              {isConnected ? 'Connected to server' : 'Disconnected' } 
+            </span>
+          </div>
+        </div>
+
+
       </div>
+
 
       <Card className='w-full p-4 mt-6'>
         <CardTitle className='text-2xl'>

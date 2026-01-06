@@ -57,6 +57,6 @@ public class AuthenticationService {
         Authentication authentication = this.authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(input.getEmail(), input.getPassword()));
         String jwtToken = this.jwtService.generateToken(authentication);
 
-        return new LoginResponse(jwtToken, this.jwtService.getExpirationTime());
+        return new LoginResponse(jwtToken, this.jwtService.getExpirationTime(), user.getEmail());
     }
 }

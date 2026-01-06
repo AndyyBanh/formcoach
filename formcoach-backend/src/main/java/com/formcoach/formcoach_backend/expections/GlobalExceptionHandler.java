@@ -31,5 +31,13 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(errorObject, HttpStatus.NOT_FOUND);
     }
 
+    @ExceptionHandler(PythonServiceException.class)
+    public ResponseEntity<ErrorObject> handlePythonServiceException(PythonServiceException ex, WebRequest request) {
+        ErrorObject errorObject = new ErrorObject();
+        errorObject.setMessage(ex.getMessage());
+        errorObject.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
+        errorObject.setTimestamp(new Date());
+        return new ResponseEntity<>(errorObject, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
 
 }
