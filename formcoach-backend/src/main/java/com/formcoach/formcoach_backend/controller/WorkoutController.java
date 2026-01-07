@@ -6,8 +6,6 @@ import com.formcoach.formcoach_backend.service.WorkoutService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 
 @Controller
@@ -30,10 +28,7 @@ public class WorkoutController {
     @MessageMapping("/workout")
     @SendTo("/topic/workout")
     public WorkoutDataResponse processWorkout(WorkoutFrameDto frame) {
-        if (frame.getUserId() == null || frame.getUserId().isEmpty()) {
-            frame.setUserId("anonymous");
-        }
-
+        frame.setSessionId("default");
         return this.workoutService.analyzeFrames(frame);
     }
 }

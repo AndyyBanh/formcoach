@@ -23,7 +23,6 @@ public class WorkoutService {
      */
     public WorkoutDataResponse analyzeFrames(WorkoutFrameDto frame) {
         try {
-
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
 

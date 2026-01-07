@@ -1,6 +1,6 @@
 "use client";
 import { Button } from '@/components/ui/button';
-import { Card, CardDescription, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardTitle } from '@/components/ui/card';
 import { Camera } from 'lucide-react';
 import { useWebSocket } from '@/hooks/useWebSocket';
 import React, { useEffect, useRef, useState } from 'react'
@@ -104,9 +104,37 @@ const page = () => {
         <p className='text-md'>Position yourself in front of Camera to begin</p>
       </div>
 
+      {/* reps and feedback cards */}
+      <div className='flex mt-4 space-x-5'>
+        <Card className='p-5'>
+          <div className='flex flex-col justify-center items-center'>
+            <CardTitle>Reps</CardTitle>
+            <CardContent>
+              <p>{workoutData?.reps? workoutData.reps : 0}</p>
+            </CardContent>
+          </div>
+        </Card>
+        <Card className='p-5'>
+          <div className='flex flex-col justify-center items-center'>
+            <CardTitle>Feedback</CardTitle>
+            <CardContent>
+              <p>{workoutData?.feedback? workoutData.feedback : 'No current feedback'}</p>
+            </CardContent>
+          </div>
+        </Card>
+         <Card className='p-5'>
+          <div className='flex flex-col justify-center items-center'>
+            <CardTitle>Bicep Angle</CardTitle>
+            <CardContent>
+              <p>{workoutData?.angle? workoutData.angle : 'No current angle'}</p>
+            </CardContent>
+          </div>
+        </Card>
+      </div>
+
       {/* webcam */}
-      <div className='w-full bg-white border rounded-2xl shadow-2xl mt-7 p-6'>
-        <div className='relative z-10 aspect-video bg-slate-900 rounded-lg overflow-hidden '>
+      <div className='w-full bg-white border rounded-2xl shadow-2xl mt-3 p-6'>
+        <div className='relative z-10 aspect-video bg-slate-900 rounded-lg overflow-hidden mx-auto max-h-[580px]'>
           {!isActive && (
             <div className='absolute inset-0 flex items-center justify-center'>
               <div className='flex flex-col items-center justify-center'>
@@ -152,8 +180,6 @@ const page = () => {
             </span>
           </div>
         </div>
-
-
       </div>
 
 
@@ -164,10 +190,13 @@ const page = () => {
         <CardDescription>
           <ul className='space-y-2 text-lg'>
             <li>
+              • This model is intended to help users correct their bicep curl form. <span className='font-bold'>Please use your left arm.</span>
+            </li>
+            <li>
               • Position yourself so full body is visible
             </li>
             <li>
-              • Stand 6-7 feet away from camera
+              • Stand few feet away from camera
             </li>
             <li>
               • Ensure lighting is good for best results

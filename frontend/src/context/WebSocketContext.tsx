@@ -41,7 +41,6 @@ export function WebSocketProvider({ children }: { children: ReactNode }) {
             return;
         }
 
-        // Create client object
         const client  = new Client({
             // Get SockJS object that opens connection to server websocket path (entrypoint/handshake)
             webSocketFactory: () => new SockJS('http://localhost:8080/ws'),

@@ -25,15 +25,15 @@ app.add_middleware(
 class WorkoutFrameRequest(BaseModel):
     exerciseId: str
     frameData: str
-    userId: str
+    sessionId: str
 
 class WorkoutResponse(BaseModel):
     reps: int
     angle: float
     feedback: str
 
-# Track reps per user {userId: counter, stage}
-user_counters = {}
+# Track reps per user {session: counter, stage}
+session_counters = {}
 
 # Initialize mediapipe
 model_path = os.path.join('.', 'data', 'pose_landmarker_lite.task')
@@ -74,12 +74,11 @@ async def analyze_frame(request: WorkoutFrameRequest):
     Analyze workout from frames
     """
     try:
-        user_id = request.userId
+        session_id = request.sessionId
 
-        # If user session does not exist initialize
-        if user_id not in user_counters:
-            user_counters[user_id] = {'counter': 0, 'stage': ''}
-            print(f"New user session created: {user_id}")
+        # keep track of sessions reps and joint position
+        if session_id not in session_counters:
+            session_counters[session_id] = {'counter': 0, 'stage': ''}
 
         # Dcode base64 image
         frame_data = request.frameData
@@ -117,8 +116,8 @@ async def analyze_frame(request: WorkoutFrameRequest):
                 )
 
                 # Curl counting logic
-                counter = user_counters[user_id]['counter']
-                stage = user_counters[user_id]['stage']
+                counter = session_counters[session_id]['counter']
+                stage = session_counters[session_id]['stage']
 
                 if left_angle > 150:
                     stage = "down"
@@ -127,14 +126,14 @@ async def analyze_frame(request: WorkoutFrameRequest):
                     stage = "up"
                     counter += 1
                     feedback = f"Rep {counter} counted! Great form!"
-                    print(f"User: {user_id} Rep: {counter}")
+                    print(f"Session: Rep: {counter}")
 
                 # Update users rep counter
-                user_counters[user_id]['counter']  = counter
-                user_counters[user_id]['stage'] = stage
+                session_counters[session_id]['counter']  = counter
+                session_counters[session_id]['stage'] = stage
 
         return WorkoutResponse(
-            reps = user_counters[user_id]['counter'],
+            reps = session_counters[session_id]['counter'],
             angle = round(left_angle, 1),
             feedback = feedback,
         )
