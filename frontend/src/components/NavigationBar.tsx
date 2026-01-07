@@ -29,11 +29,11 @@ const NavigationBar = () => {
   }
 
   return (
-    <nav className='fixed w-full h-24 shadow-xl bg-white z-50'>
+    <nav className='fixed w-full h-15 shadow-xl bg-zinc-50 z-50'>
       <div className='flex justify-between items-center h-full w-full px-4'>
         <div>
           <Link href={isLoggedIn ? '/dashboard' : '/'} >
-            <h2 className='text-3xl font-semibold uppercase '>Form Coach</h2>
+            <h2 className='text-2xl font-semibold'>Form Coach</h2>
           </Link>
           
         </div>
@@ -41,12 +41,22 @@ const NavigationBar = () => {
           {isLoggedIn ? (
             <Button
               onClick={handleSignOut}
+              className='bg-blue-500 text-white'
             >
               Logout
             </Button>
           ) : (
-            // when user not logged in show nothing on right side
-            <div>
+            <div className='flex items-center space-x-2.5'>
+              <Link href='/login'>
+                <Button variant='ghost' size='sm' className=''>
+                  Login
+                </Button>
+              </Link>
+              <Link href='/signup'>
+                <Button variant='outline' size='sm' className="bg-blue-500 text-white">
+                  Get Started
+                </Button>
+              </Link>
             </div>
           )}
         </div>
