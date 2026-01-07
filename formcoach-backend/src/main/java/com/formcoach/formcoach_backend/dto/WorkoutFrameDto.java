@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 public class WorkoutFrameDto {
-    private String exerciseId;  // e.g. bicep-curl, shoulder-press
+    private String exerciseId;
     private String frameData; // stored as Base-64 encoded images
-    private String sessionId; // for microservice to keep track of reps in session
+    private String userId;
 }

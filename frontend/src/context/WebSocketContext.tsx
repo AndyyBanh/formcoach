@@ -88,13 +88,13 @@ export function WebSocketProvider({ children }: { children: ReactNode }) {
     const sendFrame = (exerciseId: string, frameData: string) => {
         // send messsage to STOMP broker
         if (client?.connected) {
-            const userId = 'anonymous';
+
             client.publish({
                 destination: '/app/workout',
                 body: JSON.stringify({
                     exerciseId,
                     frameData,
-                    userId
+                    
                 })
             });
         } else {

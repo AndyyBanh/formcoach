@@ -25,15 +25,15 @@ app.add_middleware(
 class WorkoutFrameRequest(BaseModel):
     exerciseId: str
     frameData: str
-    sessionId: str
+    userId: str
 
 class WorkoutResponse(BaseModel):
     reps: int
     angle: float
     feedback: str
 
-# Track reps per user {session: counter, stage}
-session_counters = {}
+# Track reps per user {user_id: counter, stage}
+user_counters = {}
 
 # Initialize mediapipe
 model_path = os.path.join('.', 'data', 'pose_landmarker_lite.task')
@@ -74,11 +74,10 @@ async def analyze_frame(request: WorkoutFrameRequest):
     Analyze workout from frames
     """
     try:
-        session_id = request.sessionId
+        user_id = request.userId
 
-        # keep track of sessions reps and joint position
-        if session_id not in session_counters:
-            session_counters[session_id] = {'counter': 0, 'stage': ''}
+        if user_id not in user_counters:
+            user_counters[user_id] = {'counter': 0, 'stage': ''}
 
         # Dcode base64 image
         frame_data = request.frameData
@@ -116,8 +115,8 @@ async def analyze_frame(request: WorkoutFrameRequest):
                 )
 
                 # Curl counting logic
-                counter = session_counters[session_id]['counter']
-                stage = session_counters[session_id]['stage']
+                counter = user_counters[user_id]['counter']
+                stage = user_counters[user_id]['stage']
 
                 if left_angle > 150:
                     stage = "down"
@@ -129,11 +128,11 @@ async def analyze_frame(request: WorkoutFrameRequest):
                     print(f"Session: Rep: {counter}")
 
                 # Update users rep counter
-                session_counters[session_id]['counter']  = counter
-                session_counters[session_id]['stage'] = stage
+                user_counters[user_id]['counter']  = counter
+                user_counters[user_id]['stage'] = stage
 
         return WorkoutResponse(
-            reps = session_counters[session_id]['counter'],
+            reps = user_counters[user_id]['counter'],
             angle = round(left_angle, 1),
             feedback = feedback,
         )
