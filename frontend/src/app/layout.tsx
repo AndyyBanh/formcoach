@@ -34,7 +34,7 @@ export default function RootLayout({
         <NavigationBar />
         <Toaster position="top-center"/>
         <WebSocketProvider>
-        <main className="pt-25">
+        <main className="">
           {children}
         </main>
         </WebSocketProvider>

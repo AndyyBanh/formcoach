@@ -98,13 +98,12 @@ const page = () => {
   }, []);
 
   return (
-    <div className='min-h-screen flex flex-col items-center p-6'>
+    <div className='min-h-screen flex flex-col items-center p-6 pt-24'>
       <div className='w-full max-w-4xl text-center'>
         <h1 className='text-4xl font-bold'>Bicep Curl</h1>
         <p className='text-md'>Position yourself in front of Camera to begin</p>
       </div>
 
-      {/* reps and feedback cards */}
       <div className='flex mt-4 space-x-5'>
         <Card className='p-5'>
           <div className='flex flex-col justify-center items-center'>

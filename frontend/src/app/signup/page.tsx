@@ -107,7 +107,7 @@ const page = () => {
                             </Field>
                             <Field>
                                 <div className='flex items-center justify-between'>
-                                    <Button type='submit' className='hover:bg-gray-700'>
+                                    <Button type='submit' className='bg-blue-500 text-white hover:bg-blue-600 hover:text-white'>
                                         Submit
                                     </Button>
                                     <Link href='/login'>

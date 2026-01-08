@@ -5,7 +5,7 @@ import React from 'react'
 
 const page = () => {
   return (
-    <div className='p-6'>
+    <div className='p-6 pt-24'>
       <h1 className='text-3xl font-semibold tracking-wide'>Dashboard</h1>
       <div className='grid grid-cols-3 gap-6 mt-6'>
         <Card className='w-full p-6'>
@@ -17,7 +17,7 @@ const page = () => {
           </CardDescription>
           <CardFooter className='flex justify-end'>
             <Link href='/workout/bicep-curl' className='w-full'>
-              <Button className='w-full max-w-3xl'  >
+              <Button className='w-full max-w-3xl bg-blue-500 text-white hover:bg-blue-600 hover:text-white'  >
                 <p className='text-lg'>Start Workout</p>
               </Button>
             </Link>
