@@ -21,7 +21,7 @@ export default function Home() {
       </div>
       </section>
      
-      <section className="min-h-3/4 flex items-center justify-center px-4 py-15">
+      <section className="min-h-3/4 flex items-center justify-center px-4 py-15 bg-white">
         <div className="flex flex-col justify-center items-center w-full max-w-6xl mx-auto">
           <h2 className="text-4xl font-bold tracking-wider">The Problem</h2>
           <p className="text-xl md:text-2xl mx-auto mt-2 text-center text-gray-700">Without proper form, your fitness journey will be filled with obstacles</p>
@@ -66,15 +66,54 @@ export default function Home() {
       </section>
         
 
-      <section className="min-h-3/4 flex items-center justify-center px-4 py-15">
-        <div className="">
-          <h2 className="text-4xl font-bold tracking-wider">Our Solution</h2>
-        </div>
-        <div>
+      <section className="min-h-screen flex items-center justify-center px-4 py-15">
+        <div className="flex flex-col items-center">
+          <h2 className="text-4xl font-bold tracking-wider">How It Works</h2>
+          <p className="text-xl md:text-2xl mx-auto mt-2 text-center text-gray-700">Get professional coaching powered by AI technology</p>
           
+          <Card className="shadow-2xl p-8 md:p-12 mt-6">
+              <div className="text-left">
+                <div className="flex items-start gap-4">
+                  <div className="flex shrink-0 w-10 h-10 bg-blue-500 text-white rounded-full items-center justify-center text-xl font-bold">
+                    1
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-semibold mb-2">AI-Powered Detetctions</h3>
+                    <p className="text-gray-700">Implemented Python Computer Vision libraries to detect joints and calculate optimal angles to maximize gains.</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="border-t border-gray-200"></div>
+
+              <div className="text-left">
+                <div className="flex items-start gap-4">
+                  <div className="flex shrink-0 w-10 h-10 bg-yellow-400 text-white rounded-full items-center justify-center text-xl font-bold">
+                    2
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-semibold mb-2">Simple Setup</h3>
+                    <p className="text-gray-700">Just stand in front of your camera and follow the on-screen instructions. No special equipment needed.</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="border-t border-gray-200"></div>
+
+              <div className="text-left">
+                <div className="flex items-start gap-4">
+                  <div className="flex shrink-0 w-10 h-10 bg-green-500 text-white rounded-full items-center justify-center text-xl font-bold">
+                    3
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-semibold mb-2">Maximize Your Results</h3>
+                    <p className="text-gray-700">Prevent injuries and maximize gains with real-time feedback, at the comfort of your home.</p>
+                  </div>
+                </div>
+              </div>
+          </Card>
         </div>
       </section>
-        
      </div>
      
   
