@@ -4,14 +4,14 @@
 <p>A full stack computer vision application that allows users to correct their forms behind their computer.</p>
 
 ## Overview
-This computer vision platform allows users to prevent injury and maximize gains. Through python's computer vision libaries it detects users joints and calculates the most efficient and optimal angles in specific workouts.
+This computer vision platform allows users to prevent injury and maximize gains. Through Python's computer vision libraries it detects users joints and calculates the most efficient and optimal angles in specific workouts.
 
 ![Workout Page](docs/workout_page.png)
 
 ## Features
 - **Spring Security + JWT Authentication**: For secure user credentials and authorization for specific requests.
 - **WebSocket**: Allows real time feedback through bi-directional communication between client and server.
-- **Python Microservice**: Returns pose detection analaysis and feeback to server which propagates to client via WebSocket.
+- **Python Microservice**: Returns pose detection analysis and feedback to server which propagates to client via WebSocket.
 
 ## Project Structure
 ```
@@ -35,7 +35,7 @@ formcoach/
 │   │   │   │   ├── config/      # Security, WebSocket, CORS configs
 │   │   │   │   ├── controller/  # REST API endpoints
 │   │   │   │   ├── dto/         # Data Transfer Objects
-│   │   │   │   ├── controller/  # Exception hanlders
+│   │   │   │   ├── controller/  # Exception handler
 │   │   │   │   ├── models/      # JPA entities
 │   │   │   │   ├── repository/  # Data access layer
 │   │   │   │   ├── service/     # Business logic
@@ -44,7 +44,7 @@ formcoach/
 │
 ├── python-service/              # Python pose detection microservice
 │   ├── app/
-│   │   ├── app.py               # FastAPI application entry point, pydantic models
+│   │   ├── app.py               # FastAPI application entry point, pydantic models, detection logic
 ```
 
 ## Tech Stack
