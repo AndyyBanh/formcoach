@@ -27,11 +27,18 @@ const page = () => {
           
         <Card className='w-full p-6'> 
           <CardHeader>
-            <CardTitle className='text-2xl'>Should Press</CardTitle>
+            <CardTitle className='text-2xl'>Shoulder Press</CardTitle>
           </CardHeader>
-          <CardDescription className='text-muted-foreground text-xl'>
-            Coming Soon...
+          <CardDescription className='text-muted-foreground text-md'>
+            Correct your should press form, and keep track of reps.
           </CardDescription>
+          <CardFooter className='flex justify-end'>
+            <Link href='/workout/shoulder-press' className='w-full'>
+              <Button className='w-full max-w-3xl bg-blue-500 text-white hover:bg-blue-600 hover:text-white'>
+                <p className='text-lg'>Start Workout</p>
+              </Button>
+            </Link>
+          </CardFooter>
         </Card>
 
         <Card className='w-full p-6'>

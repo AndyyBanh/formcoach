@@ -1,5 +1,6 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from numpy.ma.core import logical_or
 from pydantic import BaseModel
 import cv2
 import mediapipe as mp
@@ -97,7 +98,7 @@ async def analyze_frame(request: WorkoutFrameRequest):
         detection_result = pose_landmarker.detect(mp_image)
 
         feedback = "Position yourself in frame"
-        left_angle = 0.0
+
 
         if detection_result.pose_landmarks:
             landmarks = detection_result.pose_landmarks[0]
@@ -120,22 +121,68 @@ async def analyze_frame(request: WorkoutFrameRequest):
 
                 if left_angle > 150:
                     stage = "down"
-                    feedback = "Good extension! Remember slowly lower weight, maintaining tension."
+                    feedback = "Remember slowly raise the weight maintaining tension."
                 if left_angle < 30 and stage == "down":
                     stage = "up"
                     counter += 1
-                    feedback = f"Rep {counter} counted! Great form!"
+                    feedback = f"Rep {counter} counted! Great form! Slowly lower the weight."
                     print(f"Session: Rep: {counter}")
 
                 # Update users rep counter
                 user_counters[user_id]['counter']  = counter
                 user_counters[user_id]['stage'] = stage
 
-        return WorkoutResponse(
-            reps = user_counters[user_id]['counter'],
-            angle = round(left_angle, 1),
-            feedback = feedback,
-        )
+                return WorkoutResponse(
+                    reps=user_counters[user_id]['counter'],
+                    angle=round(left_angle, 1),
+                    feedback=feedback,
+                )
+
+            if request.exerciseId == 'shoulder-press':
+                left_shoulder = landmarks[11]
+                left_elbow = landmarks[13]
+                left_wrist = landmarks[15]
+
+                left_angle = calculate_angle(
+                    [left_shoulder.x, left_shoulder.y],
+                    [left_elbow.x, left_elbow.y],
+                    [left_wrist.x, left_wrist.y],
+                )
+
+                right_shoulder = landmarks[12]
+                right_elbow = landmarks[14]
+                right_wrist = landmarks[16]
+
+                right_angle = calculate_angle(
+                    [right_shoulder.x, right_shoulder.y],
+                    [right_elbow.x, right_elbow.y],
+                    [right_wrist.x, right_wrist.y],
+                )
+                avg_angle = (left_angle + right_angle) / 2
+
+                # press counting logic
+                counter = user_counters[user_id]['counter']
+                stage = user_counters[user_id]['stage']
+
+
+                if left_angle < 90 and right_angle < 90:
+                    stage = "down"
+                    feedback = "Good! Now press the weight overhead."
+                elif left_angle > 115 and right_angle > 115 and stage == "down":
+                    stage = "up"
+                    counter += 1
+                    feedback = f"Rep {counter} counted! Great form!"
+                    print(f"Session: Rep: {counter}")
+
+                user_counters[user_id]['counter'] = counter
+                user_counters[user_id]['stage'] = stage
+
+                return WorkoutResponse(
+                    reps=user_counters[user_id]['counter'],
+                    angle=round(avg_angle, 1),
+                    feedback=feedback,
+                )
+
 
     except Exception as e:
         print(e)

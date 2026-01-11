@@ -59,7 +59,7 @@ const page = () => {
 
   // send frames only if camera is active and websocket is connected
   useEffect(() => {
-    if (!isActive || !isActive || !videoRef.current || !canvasRef.current) return;
+    if (!isActive || !isConnected || !videoRef.current || !canvasRef.current) return;
     const video = videoRef.current;
     const canvas = canvasRef.current;
     const ctx = canvas.getContext('2d');
@@ -173,7 +173,7 @@ const page = () => {
        </div>
 
         <div className='mt-2 flex items-center'>
-          <div className={`w-3 h-3 ${isConnected ? 'text-green-500' : 'text-red-500'}`}>
+          <div className={`${isConnected ? 'text-green-500' : 'text-red-500'}`}>
             <span className='text-sm'>
               {isConnected ? 'Connected to server' : 'Disconnected' } 
             </span>
@@ -204,10 +204,8 @@ const page = () => {
               • Click "Start Sharing Screen" to begin tracking
             </li>
           </ul>
-
         </CardDescription>
       </Card>
-    
     </div>
   )
 }
