@@ -11,7 +11,7 @@ const page = () => {
   const streamRef = useRef<MediaStream | null>(null); // active webcam Mediasteam (gives ability to stop cleanly)
   const [error, setError] = useState('');
   const [isActive, setIsActive] = useState(false);
-  const { isConnected, sendFrame, workoutData } = useWebSocket();
+  const { isConnected, sendFrame, workoutData, hasPendingFrame } = useWebSocket();
   const intervalRef = useRef<number | null>(null); // ID for frame capture interval timer
 
 
@@ -69,27 +69,31 @@ const page = () => {
       if (video.readyState < 2 || video.videoWidth === 0 || video.videoHeight ===0) {
         return;
       }
+      // backpressure: skip (before the expensive encode) while a frame is still awaiting a response
+      if (hasPendingFrame()) {
+        return;
+      }
 
-      // match canvas size to video
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
-      // draw current video frame to canvas
+      // downscale to 480px wide (preserve aspect ratio) to shrink the payload
+      const TARGET_WIDTH = 480;
+      const scale = TARGET_WIDTH / video.videoWidth;
+      canvas.width = TARGET_WIDTH;
+      canvas.height = Math.round(video.videoHeight * scale); // 640x480 -> 480x360
       ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-      // convert to Base64
-      const frameData = canvas.toDataURL('image/jpeg', 0.5);
+      const frameData = canvas.toDataURL('image/jpeg', 0.4);
       if (frameData && frameData.includes(',')) {
         sendFrame('bicep-curl', frameData);
-      }    
+      }
 
-    }, 100); // 10 FPS captures and sends frames every 100ms
+    }, 100); // capture cadence; backpressure adapts the effective send rate to pipeline speed
 
     return () => {
       if (intervalRef.current !== null){
         clearInterval(intervalRef.current);
       }
-    }    
-  }, [isActive, isConnected, sendFrame]);
+    }
+  }, [isActive, isConnected, sendFrame, hasPendingFrame]);
 
   useEffect(() => {
     return () => {

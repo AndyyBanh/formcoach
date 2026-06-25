@@ -11,7 +11,7 @@ const page = () => {
     const streamRef = useRef<MediaStream | null>(null);
     const [error, setError] = useState('');
     const [isActive, setIsActive] = useState(false);
-    const { isConnected, sendFrame, workoutData } = useWebSocket();
+    const { isConnected, sendFrame, workoutData, hasPendingFrame } = useWebSocket();
     const intervalRef = useRef<number | null>(null);
 
     const startWebcam = async () => {
@@ -66,12 +66,19 @@ const page = () => {
             if (video.readyState < 2 || video.videoWidth === 0 || video.videoHeight === 0) {
                 return;
             }
+            // backpressure: skip (before the expensive encode) while a frame is still awaiting a response
+            if (hasPendingFrame()) {
+                return;
+            }
 
-            canvas.width = video.videoWidth;
-            canvas.height = video.videoHeight;
+            // downscale to 480px wide (preserve aspect ratio) to shrink the payload
+            const TARGET_WIDTH = 480;
+            const scale = TARGET_WIDTH / video.videoWidth;
+            canvas.width = TARGET_WIDTH;
+            canvas.height = Math.round(video.videoHeight * scale); // 640x480 -> 480x360
             ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-            const frameData = canvas.toDataURL('image/jpeg', 0.5);
+            const frameData = canvas.toDataURL('image/jpeg', 0.4);
             if (frameData && frameData.includes(',')) {
                 sendFrame('shoulder-press', frameData);
             }
@@ -82,9 +89,9 @@ const page = () => {
                 clearInterval(intervalRef.current);
             }
         }
-    },  [isActive, isConnected, sendFrame]);
+    },  [isActive, isConnected, sendFrame, hasPendingFrame]);
 
-    // cleanup
+   
     useEffect(() => {
         return () => {
             stopWebcam();

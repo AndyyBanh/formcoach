@@ -1,48 +1,44 @@
 'use client';
-import React, { createContext, ReactNode, useEffect, useState } from 'react'
+import React, { createContext, ReactNode, useCallback, useEffect, useRef, useState } from 'react'
 import { Client, IMessage } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
 import { usePathname } from 'next/navigation';
 
-// Define interfaces to represent objects of data expected
+// If a sent frame gets no response within this window, assume it was lost so backpressure
+// doesn't deadlock and stop sending forever.
+const STALE_MS = 2000;
+
 interface WorkoutDataResponse {
     reps: number;
     angle: number;
     feedback: string;
 }
 
-// Define WebSocket context
 export interface WebSocketContextType {
-    isConnected: boolean; // info gained
-    sendFrame: (exceriseId: string, frameData: string) => void; // send to server
-    workoutData: WorkoutDataResponse | null; // recieve from server
+    isConnected: boolean;
+    sendFrame: (exceriseId: string, frameData: string) => void;
+    workoutData: WorkoutDataResponse | null;
+    hasPendingFrame: () => boolean;
 }
 
 export const WebSocketContext = createContext<WebSocketContextType | undefined>(undefined);
 
-/**
- * STOMPjs handles messages/communication with message broker over WebSocket using STOMP protocol
- * Sockjs handles fallback (secondary plan if websocket is unavailable)
- * Function WebSocketProvider opens and manages websocket putting data into WebSocketContext
- * Which .Provider allows all child components to access that data
- */
 export function WebSocketProvider({ children }: { children: ReactNode }) {
     const [client, setClient] = useState<Client | null>(null);
     const [isConnected, setIsConnected] = useState(false);
-    const [workoutData, setWorkoutData] = useState<WorkoutDataResponse | null>(null); 
+    const [workoutData, setWorkoutData] = useState<WorkoutDataResponse | null>(null);
+    const sentTimestamps = useRef<number[]>([]);
     const pathname = usePathname();
     useEffect(() => {
-        // Only connect when user is logged in AND on workout pages
         const token = localStorage.getItem('token');
         const isWorkoutPage = pathname?.startsWith('/workout');
-        
+
         if (!token || !isWorkoutPage) {
             console.log('Websocket not connecting user is not logged in AND not on workout page');
             return;
         }
 
         const client  = new Client({
-            // Get SockJS object that opens connection to server websocket path (entrypoint/handshake)
             webSocketFactory: () => new SockJS('http://localhost:8080/ws'),
             debug: (str) => console.log('STOMP:', str),
             heartbeatIncoming: 4000,
@@ -51,15 +47,22 @@ export function WebSocketProvider({ children }: { children: ReactNode }) {
             connectHeaders: {
                 Authorization: `Bearer ${token}`
             },
-            
+
             onConnect: () => {
                 console.log('Connected to broker');
                 setIsConnected(true);
+                sentTimestamps.current = [];
 
-                // Subscribe to message broker path where client listens for responses from server
                 client.subscribe('/topic/workout', (message: IMessage) => {
+                    const receivedAt = performance.now();
                     const response = JSON.parse(message.body);
-                    console.log('Response: ', response);
+                    const sentAt = sentTimestamps.current.shift();
+                    if (sentAt !== undefined) {
+                        const rttMs = receivedAt - sentAt;
+                        console.log(`[latency] response @ ${receivedAt.toFixed(1)}ms | RTT=${rttMs.toFixed(1)}ms | inflight=${sentTimestamps.current.length}`, response);
+                    } else {
+                        console.log('[latency] response with no matching sent frame', response);
+                    }
                     setWorkoutData(response);
                 })
             },
@@ -75,7 +78,7 @@ export function WebSocketProvider({ children }: { children: ReactNode }) {
             }
         });
 
-        client.activate(); // connects to broker
+        client.activate();
         setClient(client);
 
         return () => {
@@ -84,29 +87,37 @@ export function WebSocketProvider({ children }: { children: ReactNode }) {
     }, [pathname]);
 
 
-    // Function to send data to DTO in server
-    const sendFrame = (exerciseId: string, frameData: string) => {
-        // send messsage to STOMP broker
+    // Backpressure check: true while a frame is still awaiting a response. Evicts stale sends
+    // first so a lost response can never permanently block sending.
+    const hasPendingFrame = useCallback(() => {
+        const now = performance.now();
+        while (sentTimestamps.current.length && now - sentTimestamps.current[0] > STALE_MS) {
+            sentTimestamps.current.shift();
+        }
+        return sentTimestamps.current.length > 0;
+    }, []);
+
+    const sendFrame = useCallback((exerciseId: string, frameData: string) => {
         if (client?.connected) {
+            const sentAt = performance.now();
+            sentTimestamps.current.push(sentAt);
+            console.log(`[latency] frame sent @ ${sentAt.toFixed(1)}ms | inflight=${sentTimestamps.current.length}`);
 
             client.publish({
                 destination: '/app/workout',
                 body: JSON.stringify({
                     exerciseId,
                     frameData,
-                    
                 })
             });
         } else {
             console.log('Websocket not connected');
         }
-    }
+    }, [client]);
 
   return (
-    <WebSocketContext.Provider value={{ isConnected, sendFrame, workoutData }}>
+    <WebSocketContext.Provider value={{ isConnected, sendFrame, workoutData, hasPendingFrame }}>
         {children}
     </WebSocketContext.Provider>
   )
 }
-
-
